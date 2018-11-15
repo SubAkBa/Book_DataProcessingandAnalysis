@@ -132,3 +132,111 @@ x <- c(20, 11, 33, 50, 47)
 order(x)
 iris[order(iris$Sepal.Length), ]
 iris[order(iris$Sepal.Length, iris$Petal.Length), ]
+
+# with, within(data, expr, ...) : data - environment to make data ----
+#                                 expr - expression to evaluate
+#                                 ...  - function parameter
+# within - can modify data
+print(mean(iris$Sepal.Length))
+print(mean(iris$Sepal.Width))
+with(iris, {
+  print(mean(Sepal.Length))
+  print(mean(Sepal.Width))
+})
+x <- data.frame(val = c(1, 2, 3, 4, NA, 5, NA)); x
+x <- within(x, {
+  val <- ifelse(is.na(val), median(val, na.rm = T), val)
+}); x
+x$val[is.na(x$val)] <- median(x$val, na.rm = T); x
+data(iris)
+iris[1, 1] = NA; iris
+median_per_species <- sapply(split(iris$Sepal.Length, iris$Species), 
+                             median, na.rm = T)
+iris <- within(iris, {
+  Sepal.Length <- ifelse(is.na(Sepal.Length), 
+                         median_per_species[Species],
+                         Sepal.Length)
+}); iris
+
+# attach, detach, search ----
+Sepal.Width
+attach(iris); head(Sepal.Width)
+detach(iris); Sepal.Width
+search()
+attach(iris); search()
+detach(iris); search()
+# warning : modify after attach, then not be applied on data after detach
+head(iris); attach(iris)
+Sepal.Width[1] = -1
+Sepal.Width
+detach(iris); head(iris)
+
+# which(.max / .min) : find right index ----
+subset(iris, Species == "setosa")
+iris[iris$Species == "setosa", ]
+which(iris$Species == "setosa")
+which.min(iris$Sepal.Length)
+which.max(iris$Sepal.Length)
+
+# aggregate(X, by, FUN) : X - R Instance ----
+#                         by - list that bind group
+#                         FUN - function
+# aggregate(formula, data, FUN) : formula - y ~ x shape
+#                                           y -> value for calculating
+#                                           x -> standard value to bind data
+aggregate(Sepal.Width ~ Species, iris, mean)
+tapply(iris$Sepal.Length, iris$Species, mean)
+
+# stack / unstack ----
+x <- data.frame(a = c(3, 2, 9),
+                b = c(5, 3, 2),
+                c = c(4, 5, 7))
+x_stacked <- stack(x)
+summaryBy(values ~ ind, x_stacked)
+unstack(x_stacked, values ~ ind)
+
+# Packages ----
+# sqldf ----
+install.packages("sqldf")
+library(sqldf)
+sqldf("select distinct Species from iris")
+# warning : SQL not use '.' -> _
+sqldf("select avg(Sepal_Length) from iris where Species = 'setosa'")
+mean(subset(iris, Species == "setosa")$Sepal.Length)
+sqldf("select species, avg(sepal_length) from iris group by species")
+sapply(split(iris$Sepal.Length, iris$Species), mean)
+
+# plyr ----
+# a : array / d : data.frame / l : list
+install.packages("plyr")
+library(plyr)
+# adply ----
+# apply returns one data type
+apply(iris[, 1 : 4], 1, function(row){ print(row) })
+apply(iris, 1, function(row){ print(row) })
+adply(iris, 1, function(row){ row$Sepal.Length >= 5.0 &
+                              row$Species == "setosa"})
+# ddply ----
+ddply(iris, .(Species), function(sub){
+  data.frame(sepal.width.mean = mean(sub$Sepal.Width))})
+ddply(iris, .(Species, Sepal.Length > 5.0), function(sub){
+  data.frame(sepal.width.mean = mean(sub$Sepal.Width))})
+head(baseball)
+help(baseball)
+head(subset(baseball, id == "ansonca01"))
+ddply(baseball, .(id), function(sub){ mean(sub$g) })
+# mdplyr ----
+x <- data.frame(mean = 1 : 5, sd = 1 : 5); x
+mdply(x, rnorm, n = 2)
+
+# base ----
+# transform ----
+head(ddply(baseball, .(id), transform, cyear = year - min(year) + 1))
+# mutate : improve transform ----
+head(ddply(baseball, .(id), mutate, 
+           cyear = year - min(year) + 1, log_cyear = log(cyear)))
+# summarise ----
+head(ddply(baseball, .(id), summarise, minyear = min(year)))
+head(ddply(baseball, .(id), summarise, minyear = min(year), maxyear = max(year)))
+# subset ----
+head(ddply(baseball, .(id), subset, g == max(g)))
