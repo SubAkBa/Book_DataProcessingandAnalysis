@@ -240,3 +240,133 @@ head(ddply(baseball, .(id), summarise, minyear = min(year)))
 head(ddply(baseball, .(id), summarise, minyear = min(year), maxyear = max(year)))
 # subset ----
 head(ddply(baseball, .(id), subset, g == max(g)))
+
+# reshape2 ----
+install.packages("reshape2")
+library(reshape2)
+# melt ----
+head(french_fries)
+m <- melt(french_fries, id.vars = 1 : 4)
+head(m)
+library(plyr)
+ddply(m, .(variable), summarise, mean = mean(value, na.rm = T))
+french_fries[!complete.cases(french_fries), ]
+m <- melt(id = 1 : 4, french_fries, na.rm = T)
+head(m)
+# cast ----
+# formula rule
+# 1) id ~ variable
+# 2) use '.' if don't specify all variables
+# 3) use '...' to express the others
+m <- melt(french_fries, id.vars = 1 : 4); m
+r <- dcast(m, time + treatment + subject + rep ~ ...)
+rownames(r) <- NULL
+rownames(french_fries) <- NULL
+identical(r, french_fries)
+# summarise data
+m <- melt(french_fries, id.vars = 1 : 4); head(m)
+dcast(m, time ~ variable)
+dcast(m, time ~ variable, mean, na.rm = T)
+dcast(m, time ~ treatment + variable, mean, na.rm = T)
+ddply(m, .(time, treatment, variable), function(rows){
+  return(mean(rows$value, na.rm = T))
+}); head(m)
+
+# data.table ----
+install.packages("data.table")
+library(data.table)
+iris_table <- as.data.table(iris)
+x <- data.table(x = c(1, 2, 3), y = c("a", "b", "c"))
+class(data.table())
+tables()
+DT <- as.data.table(iris)
+DT[1, ]; DT[DT$Species == "setosa", ]
+DT[1, Sepal.Length] # Not "Sepal.Length"
+DT[1, list(Sepal.Length, Species)] # Not DT[1, c(Sepal.Length, Species)]
+DT[, mean(Sepal.Length)]
+DT[, mean(Sepal.Length - Sepal.Width)]
+DT <- as.data.table(iris)
+head(iris)
+iris[1, 1]
+DT[1, 1] # row 1 and one
+DT[1, 1, with = FALSE] # 1 -> column number
+iris[1, c("Sepal.Length")]
+DT[1, c("Sepal.Length")]
+DT[1, c("Sepal.Length"), with = F]
+DT[, mean(Sepal.Length), by = "Species"]
+DT <- data.table(x = c(1, 2, 3, 4, 5),
+                 y = c("a", "a", "a", "b", "b"),
+                 z = c("c", "c", "d", "d", "d")); DT
+DT[, mean(x), by = "y,z"]
+# setkey ----
+DF <- data.frame(x = runif(26000), y = rep(LETTERS, each = 10000))
+str(DF)
+head(DF)
+system.time(x <- DF[DF$y == "C", ])
+DT <- as.data.table(DF)
+setkey(DT, y)
+system.time(x <- DT[J("C"), ])
+DT[J("C"), mean(x)]
+DT[J("C"), list(x_mean = mean(x), x_std = sd(x))]
+DT1 <- data.table(x = runif(260000),
+                  y = rep(LETTERS, each = 10000))
+DT2 <- data.table(y = c("A", "B", "C"), z = c("a", "b", "c"))
+setkey(DT1, y)
+system.time(DT1[DT2, ])
+DF1 <- as.data.frame(DT1)
+DF2 <- as.data.frame(DT2)
+system.time(merge(DF1, DF2))
+# list -> data.frame ----
+library(plyr)
+system.time(x <- ldply(1 : 10000, function(x){
+  data.frame(val = x,
+             val2 = 2 * x,
+             val3 = 2 / x,
+             val4 = 4 * x,
+             val5 = 4 / x)
+}))
+system.time(x <- llply(1 : 10000, function(x){
+  data.frame(val = x,
+             val2 = 2 * x,
+             val3 = 2 / x,
+             val4 = 4 * x,
+             val5 = 4 / x)
+}))
+x <- lapply(1 : 10000, function(x){
+  data.frame(val = x,
+             val2 = 2 * x,
+             val3 = 2 / x,
+             val4 = 4 * x,
+             val5 = 4 / x)
+})
+system.time(y <- do.call(rbind, x))
+# rbindlist ----
+system.time(x <- ldply(1 : 10000, function(x){
+  data.frame(val = x,
+             val2 = 2 * x,
+             val3 = 2 / x,
+             val4 = 4 * x,
+             val5 = 4 / x)
+}))
+system.time(x <- llply(1 : 10000, function(x){
+  data.frame(val = x,
+             val2 = 2 * x,
+             val3 = 2 / x,
+             val4 = 4 * x,
+             val5 = 4 / x)
+}))
+system.time(x <- rbindlist(x))
+head(x)
+
+# foreach ----
+install.packages("foreach")
+library(foreach)
+foreach(i = 1 : 5) %do% {
+  return(i)
+}
+foreach(i = 1 : 5, .combine = c) %do% {
+  return(i)
+}
+foreach(i = 1 : 10, .combine = "+") %do% {
+  return(i)
+}
