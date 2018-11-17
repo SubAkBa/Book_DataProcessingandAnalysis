@@ -370,3 +370,145 @@ foreach(i = 1 : 5, .combine = c) %do% {
 foreach(i = 1 : 10, .combine = "+") %do% {
   return(i)
 }
+
+# Graph ----
+methods("plot")
+# plot(x, y) ----
+install.packages("mlbench")
+library(mlbench)
+library(help = "mlbench")
+data(Ozone)
+plot(Ozone$V8, Ozone$V9)
+# graph options ----
+# 1. xlab, ylab (name of x, y axis)
+# 2. main (name of graph)
+# 3. pch (type of dot)
+# 4. cex (size of dit)
+# 5. col (color)
+# 6. xlim, ylim (range of x, y axis)
+# 7. type (type of graph[p : dot, l : line, b : line and dot, n : nothing])
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature")
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone")
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone", pch = 20)
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone", pch = "+")
+example(points)
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone", cex = .1)
+plot(Ozone$V8, Ozone$V9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone", col = "#FF0000")
+min(Ozone$V8, na.rm = T)
+min(Ozone$V9, na.rm = T)
+max(Ozone$V8, na.rm = T)
+max(Ozone$V9, na.rm = T)
+plot(Ozone$v8, Ozone$v9, 
+     xlab = "Sandburg Temperature", ylab = "El Monte Temperature",
+     main = "Ozone",
+     xlim = c(0, 100), ylim = c(0, 90))
+data(cars)
+str(cars)
+head(cars)
+plot(cars)
+plot(cars, type = "l")
+plot(cars, type = "b")
+plot(cars, type = "o") # overlapped
+tapply(cars$dist, cars$speed, mean)
+plot(tapply(cars$dist, cars$speed, mean), type = "o",
+     cex = 0.5, xlab = "speed", ylab = "dist")
+# lty : 0 - blank, 1 - solid, 2 - dashed, 3 - dotted, 
+#       4 - dotdash, 5 - longdash, 6 - twodash
+plot(cars, type = "l", lty = "dashed")
+# jitter ----
+head(Ozone[, c("V6", "V7")])
+plot(Ozone$V6, Ozone$V7, xlab = "Windspeed", ylab = "Humidity",
+     main = "Ozone", pch = 20, cex = .5)
+plot(jitter(Ozone$V6), jitter(Ozone$V7), xlab = "Windspeed", ylab = "Humidity",
+     main = "Ozone", pch = 20, cex = .5)
+# Type of Graph ----
+# points ----
+plot(iris$Sepal.Width, iris$Sepal.Length, cex = .5, pch = 20, xlab = "width",
+     ylab = "length", main = "iris")
+points(iris$Petal.Width, iris$Petal.Length, cex = .5, pch = "+", col = "#FF0000")
+with(iris, {
+  plot(NULL, xlim = c(0, 5), ylim = c(0, 10),
+       xlab = "width", ylab = "length", main = "iris", type = "n")
+  points(Sepal.Width, Sepal.Length, cex = .5, pch = 20)
+  points(Petal.Width, Petal.Length, cex = .5, pch = 20, col = "#FF0000")
+})
+# lines ----
+x <- seq(0, 2 * pi, 0.1)
+y <- sin(x)
+plot(x, y, cex = .5, col = "red")
+lines(x, y)
+data(cars)
+head(cars)
+plot(cars)
+lines(lowess(cars)) # LOWESS find low degree polynomial like 'y=ax+b' or 'y=ax^2+bx+c'
+                    # LOWESS is called 'Locally Weighted Polynomial Regression'
+# abline ----
+# draw y=ax+b or y=h or x=v straight line
+plot(cars, xlim = c(0, 25))
+abline(a = -5, b = 3.5, col = "red")
+plot(cars, xlim = c(0, 25))
+abline(a = -5, b = 3.5, col = "red")
+abline(h = mean(cars$dist), lty = 2)
+abline(v = mean(cars$speed), lty = 2)
+# curve ----
+curve(sin, 0, 2 * pi)
+# polygon ----
+m <- lm(dist ~ speed, data = cars) # dist = 3.932 * speed - 17.5791 + e
+plot(cars)
+abline(m)
+p <- predict(m, interval = "confidence")
+head(p)
+m <- lm(dist ~ speed, data = cars)
+p <- predict(m, interval = "confidence")
+x <- c(cars$speed, tail(cars$speed, 1), rev(cars$speed), cars$speed[1])
+y <- c(p[, "lwr"], tail(p[, "upr"], 1), rev(p[, "upr"]), p[, "lwr"][1])
+plot(cars)
+abline(m)
+polygon(x, y, col = rgb(.7, .7, .7, .5))
+# text(x, y, labels, adj, pos. ...) ----
+# labels = seq_along(x) - 1, 2, 3 ... NROW(x)
+# priority : 1) pos, 2) adj
+# adj : (0, 0) - top right, (0, 1) - bottom right
+#       (1, 0) - top left, (1, 1) - bottom left
+# pos : 1 - bottom, 2 - left, 3 - top, 4 - right
+plot(4 : 6, 4 : 6)
+text(5, 5, "X")
+text(5, 5, "00", adj = c(0, 0))
+text(5, 5, "01", adj = c(0, 1))
+text(5, 5, "10", adj = c(1, 0))
+text(5, 5, "11", adj = c(1, 1))
+plot(cars, cex = .5)
+text(cars$speed, cars$dist, pos = 4)
+# identify ----
+plot(cars, cex = .5)
+identify(cars$speed, cars$dist)
+# legend ----
+plot(iris$Sepal.Width, iris$Sepal.Length, pch = 20, xlab = "width", ylab = "length")
+points(iris$Petal.Width, iris$Petal.Length, pch = "+", col = "#FF0000")
+legend("topright", legend = c("Sepal", "Petal"), pch = c(20, 43),
+       col = c("black", "red"), bg = "gray")
+# matplot ----
+x <- seq(-2 * pi, 2 * pi, 0.01); x
+y <- matrix(c(cos(x), sin(x)), ncol = 2); y
+matplot(x, y, lty = c("solid", "dashed"), cex = .2, type = "l")
+abline(h = 0, v = 0)
+# boxplot(formula, data, horizontal, notch) ----
+boxplot(iris$Sepal.Width)
+boxstats <- boxplot(iris$Sepal.Width); boxstats
+boxstats <- boxplot(iris$Sepal.Width, horizontal = T);
+text(boxstats$out, rep(1, NROW(boxstats$out)), labels = boxstats$out,
+     pos = c(1, 1, 3, 1))
+sv <- subset(iris, Species == "setosa" | Species == "versicolor")
+sv$Species <- factor(sv$Species)
+boxplot(Sepal.Width ~ Species, data = sv, notch = T)
