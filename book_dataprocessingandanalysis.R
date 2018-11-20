@@ -512,3 +512,91 @@ text(boxstats$out, rep(1, NROW(boxstats$out)), labels = boxstats$out,
 sv <- subset(iris, Species == "setosa" | Species == "versicolor")
 sv$Species <- factor(sv$Species)
 boxplot(Sepal.Width ~ Species, data = sv, notch = T)
+# hist(x, breaks = "Sturge", freq = NULL) ----
+# breaks : Sturge - log2(n) + 1
+# freq : T - frequency, F - density
+hist(iris$Sepal.Width)
+hist(iris$Sepal.Width, freq = F)
+x <- hist(iris$Sepal.Width, freq = F); x
+# density, rug ----
+plot(density(iris$Sepal.Width))
+hist(iris$Sepal.Width, freq = F)
+lines(density(iris$Sepal.Width))
+plot(density(iris$Sepal.Width))
+rug(jitter(iris$Sepal.Width))
+# barplot ----
+barplot(tapply(iris$Sepal.Width, iris$Species, mean))
+# pie, cut, table ----
+cut(1 : 10, breaks = c(0, 5, 10))
+cut(1 : 10, breaks = 3)
+cut(iris$Sepal.Width, breaks = 10)
+rep(c("a", "b", "c"), 1 : 3)
+table(rep(c("a", "b", "c"), 1 : 3))
+table(cut(iris$Sepal.Width, breaks = 10))
+pie(table(cut(iris$Sepal.Width, breaks = 10)))
+# mosaicplot : express factor variable ----
+data("Titanic")
+str(Titanic)
+Titanic
+mosaicplot(Titanic, color = T)
+mosaicplot(~ Class + Survived, data = Titanic, color = T, cex = 1.2)
+# pairs : relation between variables ----
+pairs(~ + Sepal.Width + Sepal.Length + Petal.Width + Petal.Length, 
+      data = iris, pch = c(1, 2, 3)[iris$Species], col = c("red", "blue", "green"))
+levels(iris$Species)
+as.numeric(iris$Species)
+# persp, contour, outer ----
+# persp(x = seq(0, 1, length.out = nrow(z), 
+#       y = seq(0, 1, length.out = ncol(z), 
+#       z, theta = 0, phi = 15, ...)
+#       theta - how many rotate graph left and right
+#       phi - how many rotate graph up and down
+# contour(x = seq(0, 1, length.out = nrow(z), 
+#         y = seq(0, 1, length.out = ncol(z), 
+#         z)
+# outer(X, Y, fun = "*", ...) : calculate outer product
+outer(1 : 5, 1 : 3, "+")
+outer(1 : 5, 1 : 3, function(x, y) { x + y })
+# draw X : seq(-3, 3, .1), Y : seq(-3, 3, .1) bivariate normal distribution
+install.packages("mvtnorm")
+library(mvtnorm)
+dmvnorm(c(0, 0), rep(0, 2), diag(2))
+x <- seq(-3, 3, .1)
+y <- x
+f <- function(x, y) { dmvnorm(cbind(x, y)) }
+persp(x, y, outer(x, y, f), theta = 30, phi = 30)
+contour(x, y, outer(x, y, f))
+# Make Random number
+# Binomial : rbinom
+# F : rf
+# Geometric : rgeom
+# Hypergeometric : rhyper
+# Negative Binomial : rnbinom
+# Normal : rnorm
+# Poisson : rpois
+# t : rt
+# Uniform : runif
+rnorm(100, 0, 10) # mean = 0, sd = 10, normal ditribution
+plot(density(rnorm(1000000, 0, 10)))
+# Probability Density / Mass Function - attach 'd' ex) dnorm()
+# Distribution Function - attach 'p' ex) pnorm()
+# Quantile - attach 'q' ex) qnorm() = reverse function of pnorm()
+dpois(3, 1)
+(1^3 * exp(-1)) / (factorial(3))
+pnorm(0)
+qnorm(0.5)
+# mean, var, sd ----
+mean(1 : 5)
+var(1 : 5)
+sum((1 : 5 - mean(1 : 5))^2) / (5 - 1)
+sd(1 : 5)
+# fivenum, summary ----
+fivenum(1 : 11)
+summary(1 : 11)
+fivenum(1 : 4)
+summary(1 : 4)
+# table, which.max : most frequent number ---- 
+x <- factor(c("a", "b", "c", "c", "c", "d", "d"))
+table(x)
+which.max(table(x))
+names(table(x))[3]
