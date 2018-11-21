@@ -600,3 +600,103 @@ x <- factor(c("a", "b", "c", "c", "c", "d", "d"))
 table(x)
 which.max(table(x))
 names(table(x))[3]
+# Sampling ----
+# sample(x, size, replacement = F, prob = NULL) ----
+sample(1 : 10, 5)
+sample(1 : 10, 5, replace = T)
+sample(1 : 10, 5, replace = T, prob = 1 : 10)
+# Stratified Random Sampling(no intersect set)
+# sampling::strata(data, stratanames = NULL, size, 
+#                  method = c("srswor", "srswr", "poisson", "systematic"),
+#                  pik, description = F)
+# srswor - Simple Random Sampling without Replacement
+# srswr - Simple Random Sampling with Replacement
+# poisson - poisson sampling
+# systematic - systematic sampling
+# sampling::getdata(data, m)
+install.packages("sampling")
+library(sampling)
+x <- strata(c("Species"), size = c(3, 3, 3), method = "srswor", data = iris); x
+getdata(iris, x)
+strata(c("Species"), size = c(3, 1, 1), method = "srswr", data = iris)
+iris$Species2 <- rep(1 : 2, 75) # 1, 2, 1, 2, ..., 1, 2
+strata(c("Species", "Species2"), size = c(1, 1, 1, 1, 1, 1), method = "srswr", data = iris)
+# Systematic Sampling
+library(doBy)
+x <- data.frame(x = 1 : 10); x
+sampleBy(~ 1, frac = .3, data = x, systematic = T)
+# Contingency Table
+# table, xtabs()
+table(c("a", "b", "b", "b", "c", "c", "d"))
+d <- data.frame(x = c("1", "2", "2", "1"),
+                y = c("A", "B", "A", "B"),
+                num = c(3, 5, 8, 7))
+xt <- xtabs(num ~ x + y, data = d); xt
+d2 <- data.frame(x = c("A", "A", "A", "B", "B"))
+xtabs(~ x, d2)
+# margin.table, prop.table(x, margin = NULL)
+# margin - 1 -> row direction, 2 -> column direction, NULL -> all
+margin.table(xt, 1)
+margin.table(xt, 2)
+margin.table(xt)
+prop.table(xt, 1)
+prop.table(xt, 2)
+prop.table(xt)
+# Independence test : Chi-Squared Test
+x <- seq(1, 10, .1)
+plot(x, dchisq(x, 6), type = "l")
+library(MASS)
+data(survey)
+str(survey)
+head(survey[c("Sex", "Exer")])
+xtabs(~ Sex + Exer, data = survey)
+# chisq.test(x, y = NULL, p = rep(1 / length(x), length(x)))
+# H0 : Gender and Exercise are independent(Null Hypothesis)
+chisq.test(xtabs(~ Sex + Exer, data = survey))
+# p-value : 0.05731 -> can't reject H0
+# df : (2 - 1)(3 - 1) = 2
+
+# Fisher's Exact Test
+# fisher.test(x, y = NULL, alternative = "two.sided")
+xtabs(~ W.Hnd + Clap, data = survey)
+chisq.test(xtabs(~ W.Hnd + Clap, data = survey)) # Warning message
+fisher.test(xtabs(~ W.Hnd + Clap, data = survey))
+
+# McNemar Test
+# mcnemar.test(x, y = NULL, correct = T)
+# binom.test(x, n, p = 0.5, alternative = c("two.sided", "less", "greater"))
+## Agresti (1990), p. 350.
+## Presidential Approval Ratings.
+## Approval of the President's performance in office in two
+## surveys, one month apart, for a random sample of 1600
+## voting-age Americans.
+Performance <- matrix(c(794, 86, 150, 570), nrow = 2, 
+                      dimnames = list("1st Survey" = c("Approve", "Disapprove"),
+                                      "2nd Survey" = c("Approve", "Disapprove"))); 
+Performance
+mcnemar.test(Performance)
+binom.test(86, 86 + 150, .5)
+
+# Goodness of fit test
+# Chi-squared Test
+table(survey$W.Hnd)
+chisq.test(table(survey$W.Hnd), p = c(.3, .7))
+# Shapiro-Wilk Test : test that sample is extracted in normal distribution
+shapiro.test(rnorm(1000))
+# Kolmogorov-Smirnov Test(K-S Test) # CDF - Cumulative Distribution Function
+# : use statistic that Maximum distance between data CDF and distribution CDF
+# ks.test(x, y, ..., alternative = c("two.sided", "less", "greater"))
+ks.test(rnorm(100), rnorm(100))
+ks.test(rnorm(100), runif(100))
+ks.test(rnorm(100), "pnorm", 0, 1)
+
+# Q-Q(Quantile-Quantile) Plot
+# -> visualizing examination whether data follow specific distribution
+# qqnorm, qqplot, qqline
+x <- rnorm(1000, mean = 10, sd = 1); x
+qqnorm(x)
+qqline(x, lty = 2)
+x <- runif(1000)
+qqnorm(x)
+qqline(x, lwd = 2)
+qqplot(runif(1000, min = 1, max = 10), 1 : 10)
