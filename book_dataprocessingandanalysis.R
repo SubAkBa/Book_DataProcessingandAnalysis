@@ -605,15 +605,15 @@ names(table(x))[3]
 sample(1 : 10, 5)
 sample(1 : 10, 5, replace = T)
 sample(1 : 10, 5, replace = T, prob = 1 : 10)
-# Stratified Random Sampling(no intersect set)
-# sampling::strata(data, stratanames = NULL, size, 
+# Stratified Random Sampling(no intersect set) ----
+# sampling::strata(data, stratanames = NULL, size, ----
 #                  method = c("srswor", "srswr", "poisson", "systematic"),
 #                  pik, description = F)
 # srswor - Simple Random Sampling without Replacement
 # srswr - Simple Random Sampling with Replacement
 # poisson - poisson sampling
 # systematic - systematic sampling
-# sampling::getdata(data, m)
+# sampling::getdata(data, m) ----
 install.packages("sampling")
 library(sampling)
 x <- strata(c("Species"), size = c(3, 3, 3), method = "srswor", data = iris); x
@@ -625,8 +625,8 @@ strata(c("Species", "Species2"), size = c(1, 1, 1, 1, 1, 1), method = "srswr", d
 library(doBy)
 x <- data.frame(x = 1 : 10); x
 sampleBy(~ 1, frac = .3, data = x, systematic = T)
-# Contingency Table
-# table, xtabs()
+# Contingency Table ----
+# table, xtabs() ----
 table(c("a", "b", "b", "b", "c", "c", "d"))
 d <- data.frame(x = c("1", "2", "2", "1"),
                 y = c("A", "B", "A", "B"),
@@ -634,7 +634,7 @@ d <- data.frame(x = c("1", "2", "2", "1"),
 xt <- xtabs(num ~ x + y, data = d); xt
 d2 <- data.frame(x = c("A", "A", "A", "B", "B"))
 xtabs(~ x, d2)
-# margin.table, prop.table(x, margin = NULL)
+# margin.table, prop.table(x, margin = NULL) ----
 # margin - 1 -> row direction, 2 -> column direction, NULL -> all
 margin.table(xt, 1)
 margin.table(xt, 2)
@@ -642,7 +642,7 @@ margin.table(xt)
 prop.table(xt, 1)
 prop.table(xt, 2)
 prop.table(xt)
-# Independence test : Chi-Squared Test
+# Independence test : Chi-Squared Test ----
 x <- seq(1, 10, .1)
 plot(x, dchisq(x, 6), type = "l")
 library(MASS)
@@ -650,20 +650,20 @@ data(survey)
 str(survey)
 head(survey[c("Sex", "Exer")])
 xtabs(~ Sex + Exer, data = survey)
-# chisq.test(x, y = NULL, p = rep(1 / length(x), length(x)))
+# chisq.test(x, y = NULL, p = rep(1 / length(x), length(x))) ----
 # H0 : Gender and Exercise are independent(Null Hypothesis)
 chisq.test(xtabs(~ Sex + Exer, data = survey))
 # p-value : 0.05731 -> can't reject H0
 # df : (2 - 1)(3 - 1) = 2
 
-# Fisher's Exact Test
-# fisher.test(x, y = NULL, alternative = "two.sided")
+# Fisher's Exact Test ----
+# fisher.test(x, y = NULL, alternative = "two.sided") ----
 xtabs(~ W.Hnd + Clap, data = survey)
 chisq.test(xtabs(~ W.Hnd + Clap, data = survey)) # Warning message
 fisher.test(xtabs(~ W.Hnd + Clap, data = survey))
 
-# McNemar Test
-# mcnemar.test(x, y = NULL, correct = T)
+# McNemar Test ----
+# mcnemar.test(x, y = NULL, correct = T) ----
 # binom.test(x, n, p = 0.5, alternative = c("two.sided", "less", "greater"))
 ## Agresti (1990), p. 350.
 ## Presidential Approval Ratings.
@@ -677,22 +677,22 @@ Performance
 mcnemar.test(Performance)
 binom.test(86, 86 + 150, .5)
 
-# Goodness of fit test
-# Chi-squared Test
+# Goodness of fit test ----
+# Chi-squared Test ----
 table(survey$W.Hnd)
 chisq.test(table(survey$W.Hnd), p = c(.3, .7))
-# Shapiro-Wilk Test : test that sample is extracted in normal distribution
+# Shapiro-Wilk Test : test that sample is extracted in normal distribution ----
 shapiro.test(rnorm(1000))
-# Kolmogorov-Smirnov Test(K-S Test) # CDF - Cumulative Distribution Function
+# Kolmogorov-Smirnov Test(K-S Test) # CDF - Cumulative Distribution Function ----
 # : use statistic that Maximum distance between data CDF and distribution CDF
-# ks.test(x, y, ..., alternative = c("two.sided", "less", "greater"))
+# ks.test(x, y, ..., alternative = c("two.sided", "less", "greater")) ----
 ks.test(rnorm(100), rnorm(100))
 ks.test(rnorm(100), runif(100))
 ks.test(rnorm(100), "pnorm", 0, 1)
 
-# Q-Q(Quantile-Quantile) Plot
+# Q-Q(Quantile-Quantile) Plot ----
 # -> visualizing examination whether data follow specific distribution
-# qqnorm, qqplot, qqline
+# qqnorm, qqplot, qqline ----
 x <- rnorm(1000, mean = 10, sd = 1); x
 qqnorm(x)
 qqline(x, lty = 2)
@@ -700,3 +700,94 @@ x <- runif(1000)
 qqnorm(x)
 qqline(x, lwd = 2)
 qqplot(runif(1000, min = 1, max = 10), 1 : 10)
+
+# Correlation Analysis ---- # CC : Correlation Coefficient
+# Generally, CC is Pearson CC.
+# 1. Pearson CC - Linear correlation between two variables ----
+## Covariance - How the two random variables change together. ----
+##              if two variables are same direction, covariance is Positive number
+##              if not, covariance is Negative number
+##              cov(X, Y) = E[(X - E(X))(Y - E(Y))]
+##              Var(X) = E[(X - E(X))^2]
+cov(1 : 5, 2 : 6)
+cov(1 : 5, c(3, 3, 3, 3, 3))
+cov(1 : 5, 5 : 1)
+# cor(x, y = NULL, method = c("pearson", "kendall", "spearman")) ----
+# symnum(x) - Numbers as Symbols ----
+# corrgram(x, type = NULL, panel = panel.shade, lower.panel = panel, ----
+#          upper.panel = panel, diag.panel = NULL, text.panel = textPanel)
+# lower / upper - topright, topleft
+# diag / text - diagonal
+# diagonal panel -> (panel.)txt, minmax, density
+# except diagonal panel -> (panel.)pts, pie, shade, bar, ellipse, conf
+cor(iris$Sepal.Width, iris$Sepal.Length)
+cor(iris[, 1 : 4])
+symnum(cor(iris[, 1 : 4]))
+install.packages("corrgram")
+library(corrgram)
+corrgram(iris, upper.panel = panel.conf)
+cor(1 : 10, 1 : 10)
+cor(1 : 10, 1 : 10 * 2)
+x <- 1 : 10
+y <- x ^ 3
+cor(x, y)
+# 2. Spearman's Rank CC - calculating CC as using rank of two variables ----
+# Linear relation as well as Non-Linear relation,
+# calculating Discrete and Ordinal data.
+x <- c(3, 4, 5, 3, 2, 1, 7, 5)
+rank(sort(x))
+m <- matrix(c(1 : 10, (1 : 10)^2), ncol = 2)
+cor(m, method = "spearman")
+# 3. Kendal's Rank CC - (X, Y) shape
+# (1) Concordant - when x becomes large, y becomes large.
+# (2) Discordant - when x becomes large, y becomes small.
+# (3) CC - ((Concordant count) - (DisCordant count)) / 0.5 * n * (n - 1)
+cor(c(1, 2, 3, 4, 5), c(1, 0, 3, 4, 5), method = "kendall")
+# Correlation Test - H0 : CC is 0.
+#                    H1 : CC is not 0.
+# cor.test(x, y, alternative = c("two.sided", "less", "greater"), ----
+#                method = c("pearson", "kendall", "spearman"))
+cor.test(c(1, 2, 3, 4, 5), c(1, 0, 3, 4, 5), method = "pearson")
+cor.test(c(1, 2, 3, 4, 5), c(1, 0, 3, 4, 5), method = "spearman")
+cor.test(c(1, 2, 3, 4, 5), c(1, 0, 3, 4, 5), method = "kendall")
+# Inference & Test : finding mean & variance population from mean & variance of sample ----
+# (1) Point Estimation - inferring one value
+# (2) Confidence Interval - exist somewhere near the value
+# (3) Interval Estimation - show value as Interval
+# (4) Confidence Level - When you repeat the task of finding the confidence 
+#                        interval several times, 
+#                        how often the true value belongs to that interval.
+# 1. One sample ----
+# t.test(x, y = NULL, alternative = ..., 
+#        mu = 0, paired = F, var.equal = F, conf.level = 0.95, ...)
+## mu - mean of population
+## paired - if paired sample, T / else F
+## var.equal - when paired sample, confirming if variance is equal between two groups
+## Generally, Use x, alternative, mu parameter when one sample
+x <- rnorm(30)
+t.test(x)
+x <- rnorm(30, mean = 10)
+t.test(x, mu = 10)
+# 2. Independent Two sample ----
+sleep
+sleep2 <- sleep[, -3]; sleep2
+tapply(sleep2$extra, sleep2$group, mean)
+library(doBy)
+summaryBy(extra ~ group, sleep2)
+var.test(extra ~ group, sleep2) # adopt H0(ratio of two variances is 1)
+t.test(extra ~ group, data = sleep2, paired = F, var.equal = T)
+# 3. Paired Two sample ----
+sleep
+with(sleep, t.test(extra[group == 1], extra[group == 2], paired = T))
+# 4. Two sample Variances ----
+# var.test(x, y, ratio = 1, alternative = ...) ----
+with(iris, var.test(Sepal.Width, Sepal.Length))
+# 5. One sample ratio : Probability of success when performing Bernoulli trial n times ----
+# prop.test(x, n, p = NULL, alternative = ...) ----
+# x - Number of successes
+# n - Total number of trial
+prop.test(42, 100)
+binom.test(42, 100)
+# 6. Two sample ratio : Compare with between ratio of population and ----
+#                       ratio of sample that extract from two groups
+prop.test(c(45, 55), c(100, 90))
