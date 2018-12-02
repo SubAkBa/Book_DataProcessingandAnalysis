@@ -127,3 +127,69 @@ library(caret)
 data("BreastCancer")
 m <- rpart(Class ~ ., data = BreastCancer)
 varImp(m)
+
+# 3. Model Evaluating Method
+# Confusion Matrix ----
+# 실제 / 예측 Y : True Positive(TP)
+# 실제 N / 예측 Y : False Positive(FP)
+# 실제 Y / 예측 N : False Negative(FN)
+# 실제 N / 예측 N : True Negative(TN)
+# Precision : TP / (TP + FP) - Y로 예측된 것 중 실제로도 Y인 경우
+# Accuracy : (TP + FN) / (TP + FP + FN + TN) - 전체 예측에서 옳은 예측
+# Recall(Sensitivity, TP Rate, Hit Rate) : TP / (TP + FN) - 실제로 Y인 것들 중 예측이 Y로 된 경우
+# Specificity : TN / (FP + TN) - 실제로 N인 것들 중 예측이 N으로 된 경우의 비율
+# FP Rate : FP / (FP + TN) - 실제로 N인 것들 중 Y로 예측된 경우. (1 - Specificity)
+# F1 : 2 * Precision * Recall / (Precision + Recall) - Precision과 Recall의 조화 평균
+# Kappa : (Accuracy - P(e)) / (1 - P(e)) - 두 평가자의 평가가 얼마나 일치하는지 평가하는 값
+#                                          P(e) -> 두 평가자의 평가가 우연히 일치할 확률
+#                                       {(TP + FP) * (TP + FN) * (FN + TN) * (FP + TN)} / Total^2
+predicted <- factor(c(1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1),
+                    levels = c(0, 1))
+actual <- factor(c(1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1),
+                 levels = c(0, 1))
+xtabs(~ predicted + actual)
+sum(predicted == actual) / NROW(actual)
+# e1071::confusionMatrix(data, reference)
+install.packages("e1071")
+library(e1071)
+confusionMatrix(predicted, actual) # No Information Rate : 가장 많은 값이 발견된 분류의 비율
+
+# ROC Curve ----
+# ROCR::prediction(predictions, lables) ----
+# ROCR::performance(prediction.obj, measure, x.measure) ----
+# measure - acc(Accuracy), fpr(FP Rate), tpr(TP Rate), rec(Recall)
+set.seed(137)
+probs <- runif(100)
+labels <- as.factor(ifelse(probs > .5 & runif(100) < .4, "A", "B"))
+install.packages("ROCR")
+library(ROCR)
+pred <- prediction(probs, labels); pred
+plot(performance(pred, "tpr", "fpr"))
+plot(performance(pred, "acc", "cutoff"))
+performance(pred, "auc")
+
+# Cross Validation ----
+# cvTools::cvFolds(n, K = 5, R = 1, type = c("Random", "consecutive", "interleaved")) ----
+install.packages("cvTools")
+library(cvTools)
+cvFolds(10, K = 5, type = "random")
+cvFolds(10, K = 5, type = "consecutive")
+cvFolds(10, K = 5, type = "interleaved")
+set.seed(719)
+cv <- cvFolds(NROW(iris), K = 10, R = 3); cv
+head(cv$which, 20)
+head(cv$subset)
+validation_idx <- cv$subset[which(cv$which == 1), 1]; validation_idx
+train <- iris[-validation_idx, ]
+validation <- iris[validation_idx, ]
+# caret::createDataPartition(y, times = 1, p = 0.5, list = T) ----
+# y - Category(or Label), times - Number of Division
+# p - ratio of data that will use at train data
+# caret::createFolds(y, k = 10, list = T, returnTrain = F) ----
+# caret::createMultiFolds(y, k = 10, times = 5) ----
+library(caret)
+parts <- createDataPartition(iris$Species, p = 0.8); parts
+table(iris[parts$Resample1, "Species"])
+table(iris[-parts$Resample1, "Species"])
+createFolds(iris$Species, k = 10)
+createMultiFolds(iris$Species, k = 10, times = 3)
